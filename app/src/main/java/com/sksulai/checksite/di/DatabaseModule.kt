@@ -10,6 +10,7 @@ import androidx.room.Room
 
 import com.sksulai.checksite.db.LocalDB
 import com.sksulai.checksite.db.WorkerDao
+import com.sksulai.checksite.db.WorkerRepo
 
 @InstallIn(ActivityComponent::class)
 @Module object DatabaseModule {
@@ -19,4 +20,12 @@ import com.sksulai.checksite.db.WorkerDao
             LocalDB::class.java, LocalDB.name
         ).build()
     @Provides fun provideWorkerDao(db: LocalDB) = db.getWorkerDao()
+}
+
+@InstallIn(ActivityComponent::class)
+@Module object RepositoryModule {
+    @Provides fun provideWorkerRepo(
+        context: Context,
+        dao: WorkerDao
+    ) = WorkerRepo(context, dao)
 }

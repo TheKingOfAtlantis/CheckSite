@@ -5,13 +5,13 @@ import androidx.room.TypeConverter
 import java.time.*
 import java.time.format.DateTimeFormatter
 
-class OffsetDateTimeConverter : IConverter<OffsetDateTime?, String?> {
+object OffsetDateTimeConverter : IConverter<OffsetDateTime?, String?> {
     private val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
     @TypeConverter override fun from(value: OffsetDateTime?) = value?.let { formatter.format(it) }
     @TypeConverter override fun to(value: String?)           = value?.let { formatter.parse(it, OffsetDateTime::from) }
 }
 
-class DurationConverter : IConverter<Duration?, String?> {
+object DurationConverter : IConverter<Duration?, String?> {
     @TypeConverter override fun from(value: Duration?) = value?.toString()
     @TypeConverter override fun to(value: String?)     = value?.let{ Duration.parse(it) }
 }
