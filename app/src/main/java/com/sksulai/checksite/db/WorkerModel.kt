@@ -18,11 +18,13 @@ import com.sksulai.checksite.db.converter.UriConverter
     UriConverter::class
 )
 @Entity data class WorkerModel(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Long,
     val name: String,             // Name of the task
     val description: String,      // Description of the task
     val frequency: Duration,      // Information about the job frequency
     val url: Uri,                 // The website to check
+
+    val running: Boolean,         // Whether this worker is running
 
     // Metadata & Stats
     val created: OffsetDateTime,  // When this task was created

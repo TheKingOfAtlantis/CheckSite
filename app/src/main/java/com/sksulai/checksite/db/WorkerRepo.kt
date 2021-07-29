@@ -5,16 +5,18 @@ import android.net.Uri
 import androidx.work.*
 import com.sksulai.checksite.db.converter.UriConverter
 import com.sksulai.checksite.workers.CheckSiteWorker
-import kotlinx.coroutines.flow.Flow
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
 import java.time.OffsetDateTime
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class WorkerRepo @Inject constructor(
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val dao: WorkerDao
 ) {
-    fun create(
+    suspend fun create(
         name: String,
         description: String,
         frequency: Duration,
@@ -22,26 +24,32 @@ class WorkerRepo @Inject constructor(
         autoStart: Boolean = true
     ) {
         val model = WorkerModel(
-            id          = 0,
-            name        = name,
-            description = description,
-            frequency   = frequency,
-            url         = url,
-            created     = OffsetDateTime.now(),
-            lastRan     = null,
-            count       = 0
+            id           = 0,
+            name         = name,
+            description  = description,
+            frequency    = frequency,
+            url          = url,
+            created      = OffsetDateTime.now(),
+            lastRan      = null,
+            count        = 0,
+            running      = false,
         )
-        start(context, model)
+
+        // TODO: Perform initial check of the site
+
+        val id = dao.insert(model)
+        if(autoStart) start(model.copy(id = id))
     }
 
     fun getAll()          = dao.getAll()
+    fun get(id: Long)     = dao.getById(id)
     fun get(name: String) = dao.getByName(name)
     fun get(url: Uri)     = dao.getByUrl(UriConverter.from(url)!!)
 
     /**
      * Starts a worker if one does not already exist
      */
-    fun start(context: Context, work: WorkerModel) {
+    suspend fun start(work: WorkerModel) {
         val constraint = Constraints.Builder()
             // TODO: Check user preference i.e. Check whether or not to use only unmetered
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -51,24 +59,28 @@ class WorkerRepo @Inject constructor(
             .build()
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork(work.name, ExistingPeriodicWorkPolicy.KEEP, job)
+
+        update(work.copy(running = true))
     }
 
     /**
      * Given a worker, sends a request to stop any further checking of the website
      */
-    suspend fun stop(context: Context, work: WorkerModel) {
+    suspend fun stop(work: WorkerModel) {
         WorkManager.getInstance(context)
             .cancelUniqueWork(work.name)
             .await()
+        update(work.copy(running = false))
     }
 
     /**
      * Given a worker it removes the worker from the list of workers
      */
-    suspend fun delete(context: Context, work: WorkerModel) {
+    suspend fun delete(work: WorkerModel) {
         // Ensure it has been stopped before removing it from the database
-        stop(context, work)
+        stop(work)
         dao.delete(work)
     }
 
+    suspend fun update(work: WorkerModel) = dao.update(work)
 }
