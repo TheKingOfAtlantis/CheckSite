@@ -25,6 +25,7 @@ import com.sksulai.checksite.db.converter.UriConverter
     val url: Uri,                 // The website to check
 
     val running: Boolean,         // Whether this worker is running
+    val lastChecksum: String,     // Last calculated checksum
 
     // Metadata & Stats
     val created: OffsetDateTime,  // When this task was created

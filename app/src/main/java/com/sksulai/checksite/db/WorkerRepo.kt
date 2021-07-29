@@ -29,6 +29,7 @@ class WorkerRepo @Inject constructor(
             description  = description,
             frequency    = frequency,
             url          = url,
+            lastChecksum = "",
             created      = OffsetDateTime.now(),
             lastRan      = null,
             count        = 0,
@@ -56,7 +57,10 @@ class WorkerRepo @Inject constructor(
             .build()
         val job = PeriodicWorkRequestBuilder<CheckSiteWorker>(work.frequency)
             .setConstraints(constraint)
-            .build()
+            .setInputData(Data.Builder()
+                .putLong(CheckSiteWorker.WorkID, work.id)
+                .build()
+            ).build()
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork(work.name, ExistingPeriodicWorkPolicy.KEEP, job)
 
@@ -83,4 +87,10 @@ class WorkerRepo @Inject constructor(
     }
 
     suspend fun update(work: WorkerModel) = dao.update(work)
+
+    suspend fun justRan(work: WorkerModel) = update(work.copy(
+        lastRan = OffsetDateTime.now(),
+        count   = work.count + 1
+    ))
+
 }
