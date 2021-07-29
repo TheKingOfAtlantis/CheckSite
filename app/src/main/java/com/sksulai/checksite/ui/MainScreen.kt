@@ -28,6 +28,45 @@ import java.time.Duration
 import javax.inject.Inject
 
 
+@Composable fun DurationPicker(
+    value: Duration,
+    onValueChange: (Duration) -> Unit,
+    label: @Composable () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+
+    val pressed = interactionSource.collectIsPressedAsState()
+    var openDialog by remember { mutableStateOf(false) }
+
+    if(pressed.value)
+        openDialog = true
+
+    if(openDialog) AlertDialog(
+        onDismissRequest = { openDialog = false },
+        text = {
+            Text("This is a dialog")
+        },
+        confirmButton = { Button(onClick = {
+//            onValueChange(TODO("Pass the new duration"))
+            openDialog = false
+        }) { Text("Set Duration") } },
+        dismissButton = { Button(onClick = { openDialog = false }) {
+            Text("Cancel")
+        } }
+    )
+
+
+    TextField(
+        label = label,
+        value = value.toString(),
+        onValueChange = {},
+        readOnly = true,
+        interactionSource = interactionSource,
+    )
+
+}
+
 @HiltViewModel class MainScreenViewModel @Inject constructor(
     private val repo: WorkerRepo
 ) : ViewModel() {
@@ -35,6 +74,13 @@ import javax.inject.Inject
 
     suspend fun start(work: WorkerModel) = repo.start(work)
     suspend fun stop(work: WorkerModel)  = repo.stop(work)
+
+    suspend fun create(
+        name: String,
+        description: String,
+        frequency: Duration,
+        url: Uri,
+    ) = repo.create(name, description, frequency, url)
 
     suspend fun delete(work: WorkerModel) = repo.delete(work)
 }
@@ -102,6 +148,59 @@ import javax.inject.Inject
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val name        = rememberFieldState()
+        val description = rememberFieldState()
+        val url         = rememberFieldState()
+        var freq        by remember { mutableStateOf(Duration.ofDays(1)) }
+
+        TextField(
+            modifier      = Modifier.padding(top = 16.dp, bottom = 4.dp),
+            label         = { Text("Checker name") },
+            value         = name.text,
+            onValueChange = { name.text = it },
+            singleLine    = true,
+            isError       = !name.valid
+        )
+        if(!name.valid) Text(name.error)
+
+        TextField(
+            modifier      = Modifier.padding(top = 4.dp, bottom = 4.dp),
+            label         = { Text("Description") },
+            value         = description.text,
+            onValueChange = { description.text = it },
+            singleLine    = true,
+            isError       = !description.valid
+        )
+        if(!description.valid) Text(description.error)
+
+        TextField(
+            modifier      = Modifier.padding(top = 4.dp, bottom = 8.dp),
+            label         = { Text("URL") },
+            value         = url.text,
+            onValueChange = { url.text = it },
+            singleLine    = true,
+            isError       = !url.valid
+        )
+        if(!url.valid) Text(url.error)
+
+        DurationPicker(
+            value = freq,
+            onValueChange = { freq = it }
+        ) { Text("Frequency") }
+
+        Button(
+            content = { Text("Create") },
+            onClick = { scope.launch {
+                // TODO: Validate input
+                viewModel.create(
+                    name.text,
+                    description.text,
+                    freq,
+                    Uri.parse(url.text)
+                )
+                sheetState.hide()
+            } }
+        )
 
     } }
 
