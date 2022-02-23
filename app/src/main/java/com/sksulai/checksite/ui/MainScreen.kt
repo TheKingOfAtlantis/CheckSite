@@ -1,8 +1,7 @@
 package com.sksulai.checksite.ui
 
 import android.net.Uri
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import com.sksulai.checksite.db.WorkerModel
@@ -27,45 +25,6 @@ import kotlinx.coroutines.launch
 import java.time.Duration
 import javax.inject.Inject
 
-
-@Composable fun DurationPicker(
-    value: Duration,
-    onValueChange: (Duration) -> Unit,
-    label: @Composable () -> Unit
-) {
-    val scope = rememberCoroutineScope()
-    val interactionSource = remember { MutableInteractionSource() }
-
-    val pressed = interactionSource.collectIsPressedAsState()
-    var openDialog by remember { mutableStateOf(false) }
-
-    if(pressed.value)
-        openDialog = true
-
-    if(openDialog) AlertDialog(
-        onDismissRequest = { openDialog = false },
-        text = {
-            Text("This is a dialog")
-        },
-        confirmButton = { Button(onClick = {
-//            onValueChange(TODO("Pass the new duration"))
-            openDialog = false
-        }) { Text("Set Duration") } },
-        dismissButton = { Button(onClick = { openDialog = false }) {
-            Text("Cancel")
-        } }
-    )
-
-
-    TextField(
-        label = label,
-        value = value.toString(),
-        onValueChange = {},
-        readOnly = true,
-        interactionSource = interactionSource,
-    )
-
-}
 
 @HiltViewModel class MainScreenViewModel @Inject constructor(
     private val repo: WorkerRepo
@@ -85,8 +44,10 @@ import javax.inject.Inject
     suspend fun delete(work: WorkerModel) = repo.delete(work)
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable fun MainScreen(
+@OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalFoundationApi::class
+) @Composable fun MainScreen(
     viewModel: MainScreenViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -183,10 +144,11 @@ import javax.inject.Inject
         )
         if(!url.valid) Text(url.error)
 
-        DurationPicker(
+        DurationField(
             value = freq,
-            onValueChange = { freq = it }
-        ) { Text("Frequency") }
+            onValueChange = { freq = it },
+            label =  { Text("Frequency") }
+        )
 
         Button(
             content = { Text("Create") },
