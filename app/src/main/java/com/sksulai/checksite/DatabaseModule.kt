@@ -27,14 +27,3 @@ import dagger.hilt.components.SingletonComponent
         ).build()
     @Provides fun provideWorkerDao(db: LocalDB) = db.getWorkerDao()
 }
-
-@InstallIn(
-    SingletonComponent::class,
-    ActivityComponent::class,
-    ViewModelComponent::class,
-) @Module object RepositoryModule {
-    @Provides fun provideWorkerRepo(
-        @ApplicationContext context: Context,
-        dao: WorkerDao
-    ) = WorkerRepo(context, dao)
-}

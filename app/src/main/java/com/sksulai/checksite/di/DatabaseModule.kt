@@ -21,11 +21,3 @@ import com.sksulai.checksite.db.WorkerRepo
         ).build()
     @Provides fun provideWorkerDao(db: LocalDB) = db.getWorkerDao()
 }
-
-@InstallIn(ActivityComponent::class)
-@Module object RepositoryModule {
-    @Provides fun provideWorkerRepo(
-        context: Context,
-        dao: WorkerDao
-    ) = WorkerRepo(context, dao)
-}

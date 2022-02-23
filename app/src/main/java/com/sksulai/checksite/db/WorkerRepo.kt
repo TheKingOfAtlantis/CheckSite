@@ -11,8 +11,7 @@ import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class WorkerRepo @Inject constructor(
+@Singleton class WorkerRepo @Inject constructor(
     @ApplicationContext private val context: Context,
     private val dao: WorkerDao
 ) {
@@ -51,6 +50,7 @@ class WorkerRepo @Inject constructor(
      * Starts a worker if one does not already exist
      */
     suspend fun start(work: WorkerModel) {
+        // TODO: Restart workers if we reboot or something else stops us
         val constraint = Constraints.Builder()
             // TODO: Check user preference i.e. Check whether or not to use only unmetered
             .setRequiredNetworkType(NetworkType.CONNECTED)
