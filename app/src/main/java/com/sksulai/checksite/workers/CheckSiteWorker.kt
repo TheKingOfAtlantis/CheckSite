@@ -60,7 +60,7 @@ import java.security.MessageDigest
         if(workId == 0L) return@withContext Result.failure()
 
         // Retrieve the Url for that Job
-        val data = repo.get(workId).first().let { work ->
+        repo.get(workId).first().let { work ->
             if(work == null) return@withContext Result.failure()
 
             val data = fromUrl(work.url)
@@ -75,7 +75,7 @@ import java.security.MessageDigest
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle("One of your websites have changed")
                     .setContentText("The site labelled ${work.name} has changed")
-                    .setContentIntent(PendingIntent.getActivity(applicationContext, 0, webpageIntent, 0))
+                    .setContentIntent(PendingIntent.getActivity(applicationContext, 0, webpageIntent, PendingIntent.FLAG_IMMUTABLE))
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setAutoCancel(true)
                     .build()
