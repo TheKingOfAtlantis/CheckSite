@@ -1,30 +1,31 @@
 package com.sksulai.checksite.ui
 
+import kotlinx.coroutines.launch
+import java.time.Duration
+
+import javax.inject.Inject
+import dagger.hilt.android.lifecycle.HiltViewModel
+
 import android.net.Uri
+
+import androidx.compose.runtime.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+
 import androidx.lifecycle.ViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+
 import com.sksulai.checksite.db.WorkerModel
 import com.sksulai.checksite.db.WorkerRepo
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import java.time.Duration
-import javax.inject.Inject
-
 
 @HiltViewModel class MainScreenViewModel @Inject constructor(
     private val repo: WorkerRepo
